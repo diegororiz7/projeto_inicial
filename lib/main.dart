@@ -1,6 +1,4 @@
-// ignore_for_file: unused_import, use_key_in_widget_constructors, unused_local_variable, sort_child_properties_last
-
-import 'dart:math';
+// ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
 
@@ -8,62 +6,117 @@ void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatefulWidget {
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  final List<String> destinos = [
-    'Maragogi',
-    'Alexandria',
-    'Gramado',
-    'Sem viagem por enquanto',
-  ];
-
-  String fraseAtual = 'Clique no botão e descubra seu destino';
-
-  void gerarDestino() {
-    final random = Random();
-    setState(() {
-      fraseAtual = destinos[random.nextInt(destinos.length)];
-    });
-  }
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Scaffold Demo',
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Próxima viagem', style: TextStyle(color: Colors.white)),
-          backgroundColor: Colors.blue,
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: MyHomePage(),
+    );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Scaffold e Widgets',
+          style: TextStyle(color: Colors.white),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  fraseAtual,
-                  style: TextStyle(fontSize: 20, fontStyle: FontStyle.italic),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: gerarDestino,
-                  child: Text(
-                    'Seu próximo destino',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                ),
-              ],
+        centerTitle: true,
+        backgroundColor: Colors.blue,
+      ),
+
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            DrawerHeader(child: Center(child: Text('Lista de ícones'))),
+            ListTile(
+              leading: Icon(Icons.home),
+              title: Text('Home'),
+              onTap: () {
+                print('Clicou em Home');
+              },
             ),
-          ),
+            ListTile(
+              leading: Icon(Icons.settings),
+              title: Text('Settings'),
+              onTap: () {
+                print('Clicou em Settings');
+              },
+            ),
+          ],
         ),
       ),
+
+      body: Center(
+        child: Text(
+          'Bem-vindo ao Scaffold',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+      ),
+
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add_a_photo),
+        onPressed: () {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Foto tirada!')));
+        },
+      ),
+
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.grey,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            IconButton(
+              icon: Icon(Icons.alarm, color: Colors.red),
+              onPressed: () {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('Alarme acionado!')));
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.gif_box, color: Colors.green),
+              onPressed: () {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('Caixa acionada!')));
+              },
+            ),
+          ],
+        ),
+      ),
+
+      persistentFooterButtons: [
+        IconButton(
+          icon: Icon(Icons.laptop),
+          onPressed: () {
+            print('ADS');
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.school),
+          onPressed: () {
+            print('FASM');
+          },
+        ),
+      ],
     );
   }
 }
