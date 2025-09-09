@@ -1,6 +1,7 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: unused_element
 
 import 'package:flutter/material.dart';
+import 'package:projeto_inicial/app_inicial_scaffold.dart';
 
 void main() {
   runApp(MyApp());
@@ -12,9 +13,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Scaffold Demo',
+      title: 'Game Contagem',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: ThemeData(primarySwatch: Colors.red),
       home: MyHomePage(),
     );
   }
@@ -28,95 +29,95 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  int contador = 0;
+
+  void _aumentar() {
+    setState(() {
+      contador++;
+    });
+    _checarEspecial();
+  }
+
+  void _diminuir() {
+    setState(() {
+      contador--;
+    });
+    _checarEspecial();
+  }
+
+  void _checarEspecial() {
+    if (contador % 10 == 0 && contador != 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Você chegou a $contador cliques!')),
+      );
+    }
+  }
+
+  String getMensagem() {
+    if (contador < 0) return 'Está diminuindo!';
+    if (contador == 0) return 'Comece a clicar!';
+    if (contador < 10) return 'Está aumentando!';
+    if (contador < 20) return 'Continue clicando!';
+    return 'Clique master!';
+  }
+
+  Color getCorFundo() {
+    if (contador < 0) return Colors.grey.shade100;
+    if (contador == 0) return Colors.brown.shade100;
+    if (contador < 10) return Colors.blue.shade100;
+    if (contador < 20) return Colors.orange.shade100;
+    return Colors.red.shade100;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Scaffold e Widgets',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: Text('Game contagem', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.black,
         centerTitle: true,
-        backgroundColor: Colors.blue,
       ),
-
-      drawer: Drawer(
-        child: ListView(
+      backgroundColor: getCorFundo(),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            DrawerHeader(child: Center(child: Text('Lista de ícones'))),
-            ListTile(
-              leading: Icon(Icons.home),
-              title: Text('Home'),
-              onTap: () {
-                print('Clicou em Home');
-              },
+            AnimatedSwitcher(
+              duration: Duration(milliseconds: 400),
+              transitionBuilder: (child, animation) =>
+                  ScaleTransition(scale: animation, child: child),
+              child: Text(
+                '$contador',
+                key: ValueKey(contador),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
             ),
-            ListTile(
-              leading: Icon(Icons.settings),
-              title: Text('Settings'),
-              onTap: () {
-                print('Clicou em Settings');
-              },
+            SizedBox(height: 10),
+            Text(
+              getMensagem(),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ],
         ),
       ),
-
-      body: Center(
-        child: Text(
-          'Bem-vindo ao Scaffold',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-      ),
-
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add_a_photo),
-        onPressed: () {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Foto tirada!')));
-        },
-      ),
-
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.grey,
+      bottomNavigationBar: Padding(
+        padding: EdgeInsets.all(12),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            IconButton(
-              icon: Icon(Icons.alarm, color: Colors.red),
-              onPressed: () {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text('Alarme acionado!')));
-              },
+            ElevatedButton.icon(
+              onPressed: _aumentar,
+              icon: Icon(Icons.add),
+              label: Text('Aumentar'),
             ),
-            IconButton(
-              icon: Icon(Icons.gif_box, color: Colors.green),
-              onPressed: () {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text('Caixa acionada!')));
-              },
+            ElevatedButton.icon(
+              onPressed: _diminuir,
+              icon: Icon(Icons.remove),
+              label: Text('Aumentar'),
             ),
           ],
         ),
       ),
-
-      persistentFooterButtons: [
-        IconButton(
-          icon: Icon(Icons.laptop),
-          onPressed: () {
-            print('ADS');
-          },
-        ),
-        IconButton(
-          icon: Icon(Icons.school),
-          onPressed: () {
-            print('FASM');
-          },
-        ),
-      ],
     );
   }
 }
