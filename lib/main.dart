@@ -1,10 +1,25 @@
-// ignore_for_file: unused_element
+// ignore_for_file: unused_import, unused_local_variable
 
 import 'package:flutter/material.dart';
-import 'package:projeto_inicial/app_inicial_scaffold.dart';
 
 void main() {
   runApp(MyApp());
+}
+
+class Pais {
+  String nome;
+  String capital;
+  String localizacao;
+  String imagemUrl;
+  bool curtido;
+
+  Pais({
+    required this.nome,
+    required this.capital,
+    required this.localizacao,
+    required this.imagemUrl,
+    this.curtido = false,
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -13,110 +28,112 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Game Contagem',
+      title: 'Lista de Paises',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.red),
-      home: MyHomePage(),
+      theme: ThemeData(primaryColor: Colors.teal),
+      home: ListaPaises(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+class ListaPaises extends StatefulWidget {
+  const ListaPaises({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<ListaPaises> createState() => _ListaPaisesState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int contador = 0;
+class _ListaPaisesState extends State<ListaPaises> {
+  final List<Pais> paises = [
+    Pais(
+      nome: 'Brasil',
+      capital: 'Brasília',
+      localizacao: 'América do Sul',
+      imagemUrl: 'https:flagcdn.com/w320/br.png',
+    ),
+    Pais(
+      nome: 'Argentina',
+      capital: 'Buenos Aires',
+      localizacao: 'América do Sul',
+      imagemUrl: 'https:flagcdn.com/w320/ar.png',
+    ),
+    Pais(
+      nome: 'Portugal',
+      capital: 'Lisboa',
+      localizacao: 'Europa',
+      imagemUrl: 'https:flagcdn.com/w320/pt.png',
+    ),
+    Pais(
+      nome: 'Inglaterra',
+      capital: 'Londres',
+      localizacao: 'Europa',
+      imagemUrl: 'https://flagcdn.com/w320/gb.png',
+    ),
+  ];
 
-  void _aumentar() {
+  void clicarCurtir(int index) {
     setState(() {
-      contador++;
+      paises[index].curtido = !paises[index].curtido;
     });
-    _checarEspecial();
   }
 
-  void _diminuir() {
-    setState(() {
-      contador--;
-    });
-    _checarEspecial();
-  }
-
-  void _checarEspecial() {
-    if (contador % 10 == 0 && contador != 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Você chegou a $contador cliques!')),
-      );
-    }
-  }
-
-  String getMensagem() {
-    if (contador < 0) return 'Está diminuindo!';
-    if (contador == 0) return 'Comece a clicar!';
-    if (contador < 10) return 'Está aumentando!';
-    if (contador < 20) return 'Continue clicando!';
-    return 'Clique master!';
-  }
-
-  Color getCorFundo() {
-    if (contador < 0) return Colors.grey.shade100;
-    if (contador == 0) return Colors.brown.shade100;
-    if (contador < 10) return Colors.blue.shade100;
-    if (contador < 20) return Colors.orange.shade100;
-    return Colors.red.shade100;
+  Widget linhaInfo(String emoji, String texto) {
+    return Row(
+      children: [
+        Text(emoji, style: TextStyle(fontSize: 18)),
+        Spacer(),
+        Text(texto, style: TextStyle(fontSize: 16)),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Game contagem', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.black,
+        title: Text('Lista de Paises', style: TextStyle(color: Colors.white)),
         centerTitle: true,
+        backgroundColor: Colors.tealAccent,
       ),
-      backgroundColor: getCorFundo(),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AnimatedSwitcher(
-              duration: Duration(milliseconds: 400),
-              transitionBuilder: (child, animation) =>
-                  ScaleTransition(scale: animation, child: child),
-              child: Text(
-                '$contador',
-                key: ValueKey(contador),
+      body: ListView.builder(
+        itemCount: paises.length,
+        itemBuilder: (context, index) {
+          final pais = paises[index];
+          return Card(
+            margin: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+            elevation: 3,
+            child: ListTile(
+              leading: Image.network(
+                pais.imagemUrl,
+                width: 40,
+                height: 50,
+                fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) => Icon(Icons.flag),
+              ),
+              title: Text(
+                pais.nome,
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    linhaInfo('🏛️', pais.capital),
+                    linhaInfo('📍', pais.localizacao),
+                  ],
+                ),
+              ),
+              trailing: IconButton(
+                icon: Icon(
+                  pais.curtido ? Icons.favorite : Icons.favorite_border,
+                ),
+                color: pais.curtido ? Colors.red : Colors.white,
+                onPressed: () => clicarCurtir(index),
+              ),
             ),
-            SizedBox(height: 10),
-            Text(
-              getMensagem(),
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.all(12),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            ElevatedButton.icon(
-              onPressed: _aumentar,
-              icon: Icon(Icons.add),
-              label: Text('Aumentar'),
-            ),
-            ElevatedButton.icon(
-              onPressed: _diminuir,
-              icon: Icon(Icons.remove),
-              label: Text('Aumentar'),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
