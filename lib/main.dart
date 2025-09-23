@@ -1,300 +1,151 @@
-// ignore_for_file: unused_import, prefer_final_fields, unused_field, unused_element, unnecessary_import, unnecessary_string_interpolations, prefer_interpolation_to_compose_strings
+// ignore_for_file: prefer_final_fields, unused_field, unused_element, override_on_non_overriding_member, unused_local_variable
 
 import 'package:flutter/material.dart';
 
-import 'dart:math';
-import 'dart:ui';
-
-import 'package:intl/intl.dart';
-
 void main() {
-  runApp(MyApp());
+  runApp(FilmesApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class FilmesApp extends StatelessWidget {
+  const FilmesApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Calculadora de investimentos',
+      title: 'Catálogo de Filmes',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primaryColor: Colors.green),
-      home: CalculadoraInvestimento(),
+      theme: ThemeData(primaryColor: Colors.indigo),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => TelaBase(),
+        '/filmes': (context) => TelaFilmes(categoria: ''),
+        '/detalhe': (context) => TelaDetalheFilme(filme: {}),
+      },
     );
   }
 }
 
-class CalculadoraInvestimento extends StatefulWidget {
-  const CalculadoraInvestimento({super.key});
+class TelaBase extends StatefulWidget {
+  const TelaBase({super.key});
 
   @override
-  State<CalculadoraInvestimento> createState() =>
-      _CalculadoraInvestimentoState();
+  State<TelaBase> createState() => _TelaBaseState();
 }
 
-class _CalculadoraInvestimentoState extends State<CalculadoraInvestimento> {
-  TextStyle _textStyle = TextStyle(fontSize: 16, fontWeight: FontWeight.w600);
+class _TelaBaseState extends State<TelaBase> {
+  int _paginaAtual = 0;
 
-  static final NumberFormat formatoReal = NumberFormat.currency(
-    locale: 'pt-br',
-  );
+  final List<Widget> _telas = const [TelaCategorias(), TelaSobre()];
 
-  double _investimentoMensal = 0;
-  double _anosInvestindo = 0;
-  double _resultado = 0;
-  double _rentabilidadeAnual = 0;
-  double _valorInvestido = 0;
-  double _patrimonioAcumulado = 0;
+  final List<String> _titulos = const ['Categorias', 'Sobre'];
 
-  void _atualizarValorInvestido() {
+  void _mudarPagina(int index) {
     setState(() {
-      _valorInvestido = _investimentoMensal * (_anosInvestindo * 12);
+      _paginaAtual = index;
+      Navigator.pop(context);
     });
-  }
-
-  void _atualizarResultado() {
-    setState(() {
-      _resultado =
-          (_investimentoMensal *
-                  (pow(
-                        1 + (_rentabilidadeAnual / 12 / 100),
-                        (_anosInvestindo * 12),
-                      ) -
-                      1)) /
-              (_rentabilidadeAnual / 12 / 100) -
-          _valorInvestido;
-    });
-  }
-
-  void _atualizarPatrimonioAcumulado() {
-    setState(() {
-      _patrimonioAcumulado = _valorInvestido + _resultado;
-    });
-  }
-
-  Widget textoTitulo() {
-    return Text(
-      'Calculadora de Investimentos',
-      style: TextStyle(
-        color: Colors.white,
-        fontWeight: FontWeight.bold,
-        fontStyle: FontStyle.italic,
-      ),
-    );
-  }
-
-  Widget imagemCalculadora() {
-    return SizedBox(
-      height: 50,
-      child: Image.asset('src/rentabilidade.jpg', fit: BoxFit.contain),
-    );
-  }
-
-  Widget cardInvestimento() {
-    return Card(
-      margin: EdgeInsets.all(14),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadiusGeometry.circular(14),
-      ),
-      child: Padding(
-        padding: EdgeInsets.only(top: 14, bottom: 8),
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 14),
-              child: Row(
-                children: [
-                  Text('Aporte mensal:', style: _textStyle),
-                  Spacer(),
-                  Text(
-                    '${formatoReal.format(_investimentoMensal)}',
-                    style: _textStyle,
-                  ),
-                ],
-              ),
-            ),
-            Slider(
-              value: _investimentoMensal,
-              min: 0,
-              max: 10000,
-              divisions: 10000,
-              activeColor: Colors.green.shade700,
-              inactiveColor: Colors.green.shade100,
-              onChanged: (double value) {
-                setState(() {
-                  _investimentoMensal = value;
-                });
-                _atualizarValorInvestido();
-                _atualizarResultado();
-                _atualizarPatrimonioAcumulado();
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget cardTempo() {
-    return Card(
-      margin: EdgeInsets.all(14),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadiusGeometry.circular(14),
-      ),
-      child: Padding(
-        padding: EdgeInsets.only(top: 14, bottom: 8),
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 14),
-              child: Row(
-                children: [
-                  Text('Tempo de investimento:', style: _textStyle),
-                  Spacer(),
-                  Text(_anosInvestindo.toString() + ' anos', style: _textStyle),
-                ],
-              ),
-            ),
-            Slider(
-              value: _anosInvestindo,
-              min: 0,
-              max: 10,
-              divisions: 10,
-              activeColor: Colors.green.shade700,
-              inactiveColor: Colors.green.shade100,
-              onChanged: (double value) {
-                setState(() {
-                  _anosInvestindo = value;
-                });
-                _atualizarValorInvestido();
-                _atualizarResultado();
-                _atualizarPatrimonioAcumulado();
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget cardRentabilidade() {
-    return Card(
-      margin: EdgeInsets.all(14),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadiusGeometry.circular(14),
-      ),
-      child: Padding(
-        padding: EdgeInsets.only(top: 14, bottom: 8),
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 14),
-              child: Row(
-                children: [
-                  Text('Rentabilidade anual:', style: _textStyle),
-                  Spacer(),
-                  Text(_rentabilidadeAnual.toString() + '%', style: _textStyle),
-                ],
-              ),
-            ),
-            Slider(
-              value: _rentabilidadeAnual,
-              min: 0,
-              max: 25,
-              divisions: 50,
-              activeColor: Colors.green.shade700,
-              inactiveColor: Colors.green.shade100,
-              onChanged: (double value) {
-                setState(() {
-                  _rentabilidadeAnual = value;
-                });
-                _atualizarValorInvestido();
-                _atualizarResultado();
-                _atualizarPatrimonioAcumulado();
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget cardResultado() {
-    return Card(
-      margin: EdgeInsets.all(14),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadiusGeometry.circular(14),
-      ),
-      child: Padding(
-        padding: EdgeInsetsGeometry.only(top: 14, bottom: 8),
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 26, horizontal: 16),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Valor investido:', style: _textStyle),
-                      Text(
-                        '${formatoReal.format(_valorInvestido)}',
-                        style: _textStyle,
-                      ),
-                    ],
-                  ),
-                  Divider(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Rendimento:', style: _textStyle),
-                      Text(
-                        '${formatoReal.format(_resultado)}',
-                        style: _textStyle,
-                      ),
-                    ],
-                  ),
-                  Divider(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Patrimônio acumulado:', style: _textStyle),
-                      Text(
-                        '${formatoReal.format(_patrimonioAcumulado)}',
-                        style: _textStyle,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.green.shade900,
-      appBar: AppBar(),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+      appBar: AppBar(title: Text(_titulos[_paginaAtual])),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
           children: [
-            SizedBox(height: 10),
-            textoTitulo(),
-            SizedBox(height: 10),
-            imagemCalculadora(),
-            cardInvestimento(),
-            cardTempo(),
-            cardRentabilidade(),
-            cardResultado(),
+            DrawerHeader(
+              decoration: BoxDecoration(color: Colors.indigo),
+              child: Center(
+                child: Text(
+                  'Catálogo de filmes',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.movie, color: Colors.indigo),
+              title: Text('Categorias'),
+              onTap: () {
+                _mudarPagina(0);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.info, color: Colors.indigo),
+              title: Text('Sobre'),
+              onTap: () {
+                _mudarPagina(1);
+              },
+            ),
           ],
         ),
       ),
+      body: _telas[_paginaAtual],
     );
+  }
+}
+
+class TelaCategorias extends StatelessWidget {
+  const TelaCategorias({super.key});
+
+  final categorias = const ['Ação', 'Comédia', 'Drama'];
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: categorias.length,
+      itemBuilder: (context, index) {
+        return Card(
+          margin: const EdgeInsets.all(12),
+          elevation: 3,
+          child: ListTile(
+            leading: const Icon(Icons.local_movies, color: Colors.indigo),
+            title: Text(
+              categorias[index],
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.pushNamed(
+                context,
+                '/filmes',
+                arguments: categorias[index],
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+class TelaFilmes extends StatelessWidget {
+  final String categoria;
+  const TelaFilmes({super.key, required this.categoria});
+
+  @override
+  Widget build(BuildContext context) {
+    final categoriaArg = categoria.isEmpty
+        ? ModalRoute.of(context)!.settings.arguments as String
+        : categoria;
+
+    final filmesPorCategoria = {
+      'Ação': [
+        {'titulo': 'Mad Max', 'ano': '2015', 'nota': '8.1'},
+        {'titulo': 'John Wick', 'ano': '2014', 'nota': '7.4'},
+      ],
+      'Comédia': [
+        {'titulo': 'Se beber não case', 'ano': '2009', 'nota': '7.7'},
+        {'titulo': 'As branquelas', 'ano': '2004', 'nota': '5.7'},
+      ],
+      'Drama': [
+        {'titulo': 'À procura da felicidade', 'ano': '2006', 'nota': '8.0'},
+        {'titulo': 'Clube da luta', 'ano': '1999', 'nota': '8.8'},
+      ],
+    };
+
+    final filmes = filmesPorCategoria[categoriaArg] ?? [];
+
+    return const Placeholder();
   }
 }

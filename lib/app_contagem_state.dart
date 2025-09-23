@@ -1,7 +1,6 @@
 // ignore_for_file: unused_element
 
 import 'package:flutter/material.dart';
-import 'package:projeto_inicial/app_inicial_scaffold.dart';
 
 void main() {
   runApp(MyApp());
