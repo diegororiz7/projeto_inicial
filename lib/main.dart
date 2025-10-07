@@ -43,7 +43,7 @@ class _ConversorMoedaState extends State<ConversorMoeda> {
     }
 
     setState(() {
-      carregando = false;
+      carregando = true;
       cotacao = null;
       resultado = null;
       dataHoraCotacao = null;
@@ -67,7 +67,7 @@ class _ConversorMoedaState extends State<ConversorMoeda> {
           dataHoraCotacao = dataCotacao;
           resultado = valorConvertido.toStringAsFixed(2);
 
-          historico.insert(0, '$valor $de -> $resultado $para $dataCotacao');
+          historico.insert(0, '$valor $de → $resultado $para  ($dataCotacao)');
         });
       } else {
         throw Exception('Erro na API');
@@ -183,23 +183,32 @@ class _ConversorMoedaState extends State<ConversorMoeda> {
                   ),
                 ),
               ],
-              /*if (historico.isNotEmpty) ...[
+              if (historico.isNotEmpty) ...[
                 SizedBox(height: 30),
                 Text(
-                  'Histórico de conversões',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  'Histórico de conversões:',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 10),
-                ListView.builder(
-                  itemCount: historico.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      leading: Icon(Icons.history),
-                      title: Text(historico[index]),
-                    );
-                  },
+                Center(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: historico.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Text(
+                          historico[index],
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 14),
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              ],*/
+              ],
             ],
           ),
         ),
