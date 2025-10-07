@@ -1,154 +1,155 @@
-// ignore_for_file: unused_field, prefer_final_fields, unused_element, unused_local_variable, sort_child_properties_last
+// ignore_for_file: depend_on_referenced_packages, unused_import, unused_field, prefer_final_fields, dead_code, empty_catches, unused_local_variable, use_build_context_synchronously, avoid_print, use_full_hex_values_for_flutter_colors
 
 import 'package:flutter/material.dart';
-import 'dart:math';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() {
   runApp(
-    MaterialApp(debugShowCheckedModeBanner: false, home: CalculadoraIMC()),
+    MaterialApp(debugShowCheckedModeBanner: false, home: ConversorMoeda()),
   );
 }
 
-class CalculadoraIMC extends StatefulWidget {
-  const CalculadoraIMC({super.key});
+class ConversorMoeda extends StatefulWidget {
+  const ConversorMoeda({super.key});
 
   @override
-  State<CalculadoraIMC> createState() => _CalculadoraIMCState();
+  State<ConversorMoeda> createState() => _ConversorMoedaState();
 }
 
-class _CalculadoraIMCState extends State<CalculadoraIMC> {
-  final _formKey = GlobalKey<FormState>();
-  final _pesoController = TextEditingController();
-  final _alturaController = TextEditingController();
+class _ConversorMoedaState extends State<ConversorMoeda> {
+  final TextEditingController _controller = TextEditingController();
 
-  String _resultado = 'Informe seus dados';
+  String de = 'USD';
+  String para = 'BRL';
+  double? cotacao;
+  String? resultado;
+  bool carregando = false;
 
-  void _limparCampos() {
-    _pesoController.clear();
-    _alturaController.clear();
-    setState(() {
-      _resultado = 'Informe seus dados';
-    });
-  }
+  final List<String> modedas = [
+    'USD',
+    'BRL',
+    'EUR',
+    'ARS',
+    'CAD',
+    'JPY',
+    'BTC',
+  ];
 
-  void _calcularImc() {
-    final peso = double.tryParse(_pesoController.text);
-    final altura = double.tryParse(_alturaController.text);
-
-    if (peso == null || altura == null || peso <= 0 || altura <= 0) {
-      setState(() {
-        _resultado = 'Por favor, digite informações válidas';
-      });
+  Future<void> converter() async {
+    final valor = _controller.text;
+    if (valor.isEmpty ||
+        double.tryParse(valor) == null ||
+        double.tryParse(valor)! < 0) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Digite um valor válido')));
       return;
     }
 
-    double imc = peso / (pow(altura, 2));
-    String classificacao;
-
-    if (imc < 18.5) {
-      classificacao = 'Baixo peso';
-    } else if (imc < 25) {
-      classificacao = 'Peso normal';
-    } else if (imc < 30) {
-      classificacao = 'Sobrepeso';
-    } else if (imc < 35) {
-      classificacao = 'Obesidade I';
-    } else if (imc < 40) {
-      classificacao = 'Obesidade II';
-    } else {
-      classificacao = 'Obesidade III';
-    }
-
     setState(() {
-      _resultado =
-          'IMC: ${imc.toStringAsFixed(1)}\nClassificação: $classificacao';
+      carregando = true;
+      cotacao = null;
+      resultado = null;
     });
+
+    try {
+      final url = 'https://economia.awesomeapi.com.br/json/last/$de-$para';
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final key = '$de$para';
+        final taxa = double.parse(data[key]['bid']);
+
+        final valorConvertido = double.parse(valor) * taxa;
+
+        setState(() {
+          carregando = false;
+          cotacao = taxa;
+          resultado = valorConvertido.toStringAsFixed(2);
+        });
+      } else {
+        throw Exception('Erro na API');
+      }
+    } catch (e) {
+      print('Erro na conversão: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao buscar cotação, tente novamente!')),
+      );
+    } finally {
+      setState(() {
+        carregando = false;
+      });
+    }
+  }
+
+  void inverter() {
+    setState(() {
+      final temp = de;
+      de = para;
+      para = temp;
+      resultado = null;
+      cotacao = null;
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white12,
       appBar: AppBar(
-        title: Text('Calculadora IMC', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.blue,
+        title: Text(
+          'Conversor de Moedas',
+          style: TextStyle(color: Colors.white),
+        ),
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: _limparCampos,
-            color: Colors.white,
-          ),
-        ],
+        backgroundColor: Colors.greenAccent,
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
+      body: Center(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(20),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _buildCampoTexto(
-                controller: _pesoController,
-                label: 'Peso',
-                error: 'Peso inválido',
-                max: 635,
-              ),
+              /*buildDropDown('De', de, (val) {
+                setState(() {
+                  de = val!;
+                });
+              }),
+              buildDropDown('Para', para, (val) {
+                setState(() {
+                  para = val!;
+                });
+              }),*/
               SizedBox(height: 20),
-              _buildCampoTexto(
-                controller: _alturaController,
-                label: 'Altura',
-                error: 'Altura inválida',
-                max: 2.72,
-              ),
-              SizedBox(height: 20),
-              _buildResultado(),
               ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    _calcularImc();
-                  }
-                },
-                child: Text(
-                  'CALCULAR',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
+                onPressed: inverter,
+                child: Text('Inverter moeda'),
+              ),
+              SizedBox(height: 20),
+              TextField(
+                controller: _controller,
+                decoration: InputDecoration(
+                  labelText: 'Valor para converter',
+                  border: OutlineInputBorder(),
                 ),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                keyboardType: TextInputType.number,
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: converter,
+                child: Text('Converter moeda'),
               ),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildCampoTexto({
-    required TextEditingController controller,
-    required String label,
-    required String error,
-    required double max,
-  }) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: TextInputType.number,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-      validator: (text) {
-        final value = double.tryParse(text ?? '');
-        if (value == null || value <= 0 || value > max) {
-          return 'Por favor, insira dados válidos';
-        }
-        return null;
-      },
-    );
-  }
-
-  Widget _buildResultado() {
-    return Text(
-      _resultado,
-      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-      textAlign: TextAlign.center,
     );
   }
 }
